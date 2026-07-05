@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/syahrul/fitmetrics-api/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -32,5 +33,12 @@ func ConnectDatabase() {
 	}
 
 	DBGlobal = db
-	log.Println("Koneksi ke PostgreSQL berhasil!")
+
+	// Menjalankan migrasi otomatis untuk membuat tabel
+	err = db.AutoMigrate(&models.WorkoutLog{})
+	if err != nil {
+		log.Fatal("Gagal melakukan migrasi tabel: ", err.Error())
+	}
+
+	log.Println("Koneksi ke PostgreSQL berhasil! Kulkas data siap digunakan dan tabel sudah dibuat.")
 }
