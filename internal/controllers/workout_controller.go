@@ -32,7 +32,7 @@ func CreateWorkout(c *gin.Context) {
 	})
 }
 
-	// GetWorkouts adalah fungsi untuk mengambil semua data latihan dari database
+// GetWorkouts adalah fungsi untuk mengambil semua data latihan dari database
 func GetWorkouts(c *gin.Context) {
 	// Siapkan wadah untuk menampung banyak data (menggunakan array/slice)
 	var workouts []models.WorkoutLog
@@ -50,3 +50,52 @@ func GetWorkouts(c *gin.Context) {
 	})
 }
 
+// UpdateWorkout untuk mengubah data latihan berdasarkan ID
+func UpdateWorkout(c *gin.Context) {
+	// 1. Ambil ID dari alamat URL (misal: /workouts/1)
+	id := c.Param("id")
+	var workout models.WorkoutLog
+
+	// 2. Cek di kulkas (database), apakah data dengan ID tersebut ada?
+	if err := config.DBGlobal.First(&workout, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Data latihan tidak ditemukan!"})
+		return
+	}
+
+	// 3. Tangkap data perubahannya dari pengguna
+	var updateData models.WorkoutLog
+	if err := c.ShouldBindJSON(&updateData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Format data salah!"})
+		return
+	}
+
+	// 4. Timpa data lama dengan data baru, lalu simpan!
+	config.DBGlobal.Model(&workout).Updates(updateData)
+
+	// 5. Kembalikan respon sukses
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Data latihan berhasil diubah!",
+		"data":    workout,
+	})
+}
+
+// DeleteWorkout untuk menghapus data latihan berdasarkan ID
+func DeleteWorkout(c *gin.Context) {
+	// 1. Ambil ID dari alamat URL
+	id := c.Param("id")
+	var workout models.WorkoutLog
+
+	// 2. Cek apakah datanya ada di database
+	if err := config.DBGlobal.First(&workout, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Data latihan tidak ditemukan!"})
+		return
+	}
+
+	// 3. Hapus data tersebut dari database
+	config.DBGlobal.Delete(&workout)
+
+	// 4. Berikan respon sukses
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Data latihan berhasil dihapus selamanya!",
+	})
+}

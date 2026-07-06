@@ -23,9 +23,6 @@ func main() {
 	// 3. Inisialisasi router Gin
 	r := gin.Default()
 
-	// INI JALUR BARU KITA: Menerima data JSON dan meneruskannya ke fungsi CreateWorkout
-	r.POST("/workouts", controllers.CreateWorkout)
-
 	// 4. Daftar Jalur API (Routes)
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -33,9 +30,10 @@ func main() {
 		})
 	})
 
-	// Rute CRUD Latihan
-	r.GET("/workouts", controllers.GetWorkouts) // <--- INI RUTE BARU KITA
-
+	r.POST("/workouts", controllers.CreateWorkout)
+	r.GET("/workouts", controllers.GetWorkouts)
+	r.PUT("/workouts/:id", controllers.UpdateWorkout)
+	r.DELETE("/workouts/:id", controllers.DeleteWorkout) // <--- INI RUTE TERAKHIR KITA
 	// 5. Ambil port dari .env, atau gunakan 8080 sebagai default
 	port := os.Getenv("PORT")
 	if port == "" {
